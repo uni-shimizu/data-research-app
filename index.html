@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>データ研究所 － データの性質・形・管理を体験しよう －</title>
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #34495e;
+      --accent-color: #3498db;
+      --success-color: #2ecc71;
+      --warning-color: #f39c12;
+      --danger-color: #e74c3c;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --text-light: #7f8c8d;
+      --teacher-bg: #fff3e0;
+      --teacher-border: #ffb74d;
+      --teacher-text: #e65100;
+      --border-radius: 12px;
+      --spacing: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      font-size: 18px;
+    }
+
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 15px var(--spacing);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    #progress-display {
+      font-weight: bold;
+      background-color: rgba(255,255,255,0.2);
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+
+    .teacher-toggle {
+      background-color: transparent;
+      border: 1px solid white;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background-color 0.2s;
+    }
+
+    .teacher-toggle:hover {
+      background-color: rgba(255,255,255,0.2);
+    }
+
+    .teacher-toggle.active {
+      background-color: var(--warning-color);
+      border-color: var(--warning-color);
+      color: white;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--spacing);
+      min-height: calc(100vh - 70px);
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      border: 1px solid #eaeaea;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      border-bottom: 2px solid var(--accent-color);
+      padding-bottom: 10px;
+      display: inline-block;
+    }
+
+    h3 {
+      color: var(--secondary-color);
+      margin-top: 15px;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+
+    p {
+      margin-bottom: 15px;
+    }
+
+    .large-text {
+      font-size: 1.3rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 30px 0;
+      color: var(--primary-color);
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: transform 0.1s, background-color 0.2s, opacity 0.2s;
+      text-decoration: none;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn:hover:not(:disabled) {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      color: var(--accent-color);
+      border: 2px solid var(--accent-color);
+    }
+    .btn-outline:hover:not(:disabled) {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    .btn-large {
+      font-size: 1.2rem;
+      padding: 15px 30px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .btn-success { background-color: var(--success-color); }
+    .btn-success:hover:not(:disabled) { background-color: #27ae60; }
+    
+    .btn-warning { background-color: var(--warning-color); color: #fff;}
+    .btn-warning:hover:not(:disabled) { background-color: #d68910; }
+
+    .btn-danger { background-color: var(--danger-color); }
+    .btn-danger:hover:not(:disabled) { background-color: #c0392b; }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+      gap: 15px;
+    }
+
+    .nav-buttons.center {
+      justify-content: center;
+    }
+
+    .survey-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    
+    @media (min-width: 768px) {
+      .survey-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .survey-item {
+      background: var(--bg-color);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .survey-item h4 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+      color: var(--primary-color);
+    }
+
+    .question-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed #ccc;
+    }
+    
+    .question-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .options-group {
+      display: flex;
+      gap: 5px;
+    }
+
+    .option-btn {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .option-btn.selected-yes { background-color: #e8f5e9; border-color: var(--success-color); font-weight: bold; }
+    .option-btn.selected-maybe { background-color: #fff8e1; border-color: var(--warning-color); font-weight: bold; }
+    .option-btn.selected-no { background-color: #ffebee; border-color: var(--danger-color); font-weight: bold; }
+
+    .result-box {
+      background-color: #e8f4f8;
+      border-left: 5px solid var(--accent-color);
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .diagram-box {
+      text-align: center;
+      margin: 30px 0;
+      padding: 20px;
+      background: #fdfdfd;
+      border: 2px dashed #bdc3c7;
+      border-radius: 10px;
+    }
+
+    .scale-step {
+      display: inline-block;
+      padding: 10px 20px;
+      background: var(--primary-color);
+      color: white;
+      border-radius: 8px;
+      margin: 5px;
+      font-weight: bold;
+    }
+    .scale-arrow {
+      color: var(--text-light);
+      font-size: 1.5rem;
+      margin: 5px 0;
+    }
+
+    .classification-area {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    @media (min-width: 768px) {
+      .classification-area { flex-direction: row; }
+    }
+    
+    .class-box {
+      flex: 1;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      min-height: 200px;
+      background: #fafafa;
+    }
+    .class-box h4 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: var(--secondary-color);
+    }
+    .data-card {
+      background: white;
+      border: 1px solid var(--accent-color);
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+    }
+    .data-card:hover {
+      transform: scale(1.02);
+      background-color: #f0f8ff;
+    }
+
+    .unclassified-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      padding: 20px;
+      background: #eee;
+      border-radius: 8px;
+    }
+
+    .teacher-note {
+      display: none;
+      background-color: var(--teacher-bg);
+      border-left: 5px solid var(--teacher-border);
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+      color: var(--teacher-text);
+      font-size: 0.95rem;
+    }
+
+    .teacher-note strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #d84315;
+    }
+
+    body.teacher-mode .teacher-note {
+      display: block;
+    }
+
+    .dbms-diagram {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      max-width: 500px;
+      margin: 30px auto;
+      text-align: center;
+    }
+    .dbms-core {
+      grid-column: 1 / -1;
+      background: var(--primary-color);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .dbms-feature {
+      background: #e8f4f8;
+      border: 2px solid var(--accent-color);
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .feedback-message {
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      display: none;
+    }
+    .feedback-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .feedback-incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    
+    .hint-box {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .stock-simulation {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 20px;
+      background: #f1f2f6;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    .user-box { text-align: center; }
+    .stock-box {
+      font-size: 1.5rem;
+      font-weight: bold;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-align: center;
+      min-width: 150px;
+    }
+    .stock-danger { color: var(--danger-color); }
+
+    .reflection-form { margin-top: 20px; }
+    .checkbox-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .checkbox-group label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .checkbox-group input { width: 20px; height: 20px; cursor: pointer; }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 1rem;
+      resize: vertical;
+    }
+    .reflection-result {
+      background: #e8f5e9;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    /* 教師モード用パスワード入力画面（モーダル）のスタイル */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      max-width: 90%;
+      width: 350px;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 12px;
+      margin: 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1.1rem;
+    }
+    .modal-error {
+      color: var(--danger-color);
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+      display: none;
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>データ研究所</h1>
+    <div class="header-controls">
+      <div id="progress-display">Home</div>
+      <button id="teacher-mode-btn" class="teacher-toggle">教師モード OFF</button>
+    </div>
+  </header>
+
+  <!-- 教師モード用パスワード入力画面 -->
+  <div id="teacher-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 style="color:var(--primary-color); margin-top:0;">教師モードへの切り替え</h3>
+      <p style="font-size: 0.9rem; margin-top: 10px; color:var(--text-light);">パスワードを入力してください。</p>
+      <input type="password" id="teacher-password" placeholder="パスワードを入力">
+      <div id="teacher-modal-error" class="modal-error">パスワードが間違っています。</div>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button class="btn btn-outline" onclick="teacherModal.close()">キャンセル</button>
+        <button class="btn btn-warning" onclick="teacherModal.check()">切り替え</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="app">
+    <!-- ==========================================
+         HOME 画面
+    =========================================== -->
+    <div id="screen-home" class="screen active">
+      <div class="card" style="text-align: center; padding: 40px 20px;">
+        <h2 style="font-size: 2rem; border: none;">データ研究所</h2>
+        <p style="font-size: 1.2rem; color: var(--text-light); margin-bottom: 40px;">－ データの性質・形・管理を体験しよう －</p>
+        
+        <p>このアプリでは、情報社会で欠かせない「データ」について、3つのステップで研究します。</p>
+        <p>まずは自分で予想して、実際に操作しながら確かめてみましょう。</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 20px; max-width: 400px; margin: 40px auto 0;">
+          <button class="btn btn-large" onclick="app.navigate('lab1-intro')">LAB 1<br><span style="font-size:1rem; font-weight:normal;">データの性質を調べる</span></button>
+          <button class="btn btn-large" onclick="app.navigate('lab2-intro')">LAB 2<br><span style="font-size:1rem; font-weight:normal;">データの形を調べる</span></button>
+          <button class="btn btn-large" onclick="app.navigate('lab3-intro')">LAB 3<br><span style="font-size:1rem; font-weight:normal;">データを安全に管理する</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         LAB 1: データの性質を調べる
+    =========================================== -->
+    <div id="screen-lab1-intro" class="screen">
+      <div class="card">
+        <h2>LAB 1: データの性質を調べる</h2>
+        <p>最初の研究テーマです。</p>
+        <div class="large-text">
+          「同じ『データ』なのに、<br>できる比較や計算が違うのはなぜ？」
+        </div>
+        <p>例えば「血液型」と「気温」。どちらもデータですが、扱い方は同じでしょうか？</p>
+        <p>次の画面で、4種類のデータについて「できること・できないこと」を予想してみましょう。</p>
+        
+        <div class="teacher-note">
+          <strong>教師用ヒント</strong>
+          ここでは「名義尺度」「順序尺度」などの用語はまだ出しません。生徒が日常的な感覚で「これは足し算できないな」「これは2倍と言えるな」と気づくことが目的です。
+        </div>
+
+        <div class="nav-buttons center">
+          <button class="btn" onclick="app.navigate('home')">戻る</button>
+          <button class="btn" onclick="app.navigate('lab1-survey')">予想してみる</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab1-survey" class="screen">
+      <div class="card">
+        <h2>LAB 1: データの性質を予想しよう</h2>
+        <p>以下の4つのデータについて、4つの項目が「できるか」を判定してください。</p>
+        
+        <div class="survey-grid" id="lab1-survey-container">
+          <!-- JSで動的に生成されます -->
+        </div>
+
+        <div class="nav-buttons center">
+          <button class="btn" onclick="app.navigate('lab1-intro')">戻る</button>
+          <button class="btn btn-success" id="btn-lab1-survey-result" disabled onclick="app.navigate('lab1-result')">結果を確認する</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab1-result" class="screen">
+      <div class="card">
+        <h2>LAB 1: 結果と解説</h2>
+        <p>それぞれのデータの性質には、以下のような名前（尺度）がついています。</p>
+        
+        <div id="lab1-result-container">
+          <!-- JSで動的に生成されます -->
+        </div>
+
+        <div class="diagram-box">
+          <p>データから読み取れる情報（できること）は、段階的に増えていきます。</p>
+          <div>
+            <div class="scale-step">名義尺度<br><small>「分類できる」</small></div>
+          </div>
+          <div class="scale-arrow">↓ ＋順番</div>
+          <div>
+            <div class="scale-step" style="background:#2980b9;">順序尺度<br><small>「順番を比べられる」</small></div>
+          </div>
+          <div class="scale-arrow">↓ ＋差</div>
+          <div>
+            <div class="scale-step" style="background:#27ae60;">間隔尺度<br><small>「差を比べられる」</small></div>
+          </div>
+          <div class="scale-arrow">↓ ＋比</div>
+          <div>
+            <div class="scale-step" style="background:#e67e22;">比例尺度<br><small>「何倍かを比べられる」</small></div>
+          </div>
+          <p style="margin-top:15px; color:var(--danger-color); font-weight:bold;">下に行くほど、データから読み取れる情報が増えます。</p>
+        </div>
+
+        <div class="nav-buttons center">
+          <button class="btn" onclick="app.navigate('lab1-type')">次へ</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab1-type" class="screen">
+      <div class="card">
+        <h2>質的データと量的データ</h2>
+        <p>データは、その性質からさらに大きく2つに分けることができます。</p>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
+          <div style="flex: 1; min-width: 250px; background: #e8f5e9; padding: 20px; border-radius: 8px;">
+            <h3 style="color:#27ae60; margin-top:0;">質的データ</h3>
+            <p><strong>種類やカテゴリーとして扱うデータ</strong></p>
+            <p>主に：<br>・名義尺度<br>・順序尺度</p>
+          </div>
+          <div style="flex: 1; min-width: 250px; background: #fff3e0; padding: 20px; border-radius: 8px;">
+            <h3 style="color:#e67e22; margin-top:0;">量的データ</h3>
+            <p><strong>数量として扱うデータ</strong></p>
+            <p>主に：<br>・間隔尺度<br>・比例尺度</p>
+          </div>
+        </div>
+
+        <div class="result-box" style="border-color: var(--danger-color); background: #ffebee; margin-top: 30px;">
+          <h3 style="color:var(--danger-color); margin-top:0;">⚠ 注意ポイント</h3>
+          <p class="large-text" style="margin: 10px 0;">「数字で書かれている ＝ 量的データ」とは限らない！</p>
+          <p>例：スポーツ選手の「背番号10番」。これは「10という量（大きさ）」ではなく、選手を区別するためのラベル（名前の代わり）として使われています。つまり質的データ（名義尺度）です。</p>
+        </div>
+
+        <div class="teacher-note">
+          <strong>教師用ヒント</strong>
+          「電話番号」や「郵便番号」も数字ですが、足したり引いたりすることに意味がないため、質的データ（名義尺度）であることを補足すると分かりやすいです。
+        </div>
+
+        <div class="nav-buttons center">
+          <button class="btn" onclick="app.navigate('lab1-challenge')">別の問題で確かめる</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab1-challenge" class="screen">
+      <div class="card">
+        <h2>LAB 1: チャレンジ</h2>
+        <p>表示されたデータが、「質的 / 量的」のどちらか、また「4つの尺度」のどれに当てはまるか判断してください。</p>
+        
+        <div style="text-align: right; margin-bottom: 10px;">
+          <span id="lab1-challenge-progress">問題 1 / X</span>
+        </div>
+
+        <div class="result-box" style="text-align: center; font-size: 1.5rem; font-weight: bold; background: white; border: 2px solid var(--primary-color);">
+          <span id="lab1-challenge-word">データ</span>
+        </div>
+
+        <div id="lab1-challenge-ui">
+          <h3 style="text-align:center;">Q1. 質的？ 量的？</h3>
+          <div style="display:flex; justify-content:center; gap:15px; margin-bottom: 20px;">
+            <button class="btn btn-outline" onclick="lab1Logic.checkChallenge1('質的')">質的データ</button>
+            <button class="btn btn-outline" onclick="lab1Logic.checkChallenge1('量的')">量的データ</button>
+          </div>
+
+          <div id="lab1-challenge-step2" style="display:none;">
+            <h3 style="text-align:center;">Q2. どの尺度？</h3>
+            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;">
+              <button class="btn btn-outline" onclick="lab1Logic.checkChallenge2('名義')">名義尺度</button>
+              <button class="btn btn-outline" onclick="lab1Logic.checkChallenge2('順序')">順序尺度</button>
+              <button class="btn btn-outline" onclick="lab1Logic.checkChallenge2('間隔')">間隔尺度</button>
+              <button class="btn btn-outline" onclick="lab1Logic.checkChallenge2('比例')">比例尺度</button>
+            </div>
+            
+            <div style="text-align:center; margin-top: 15px;">
+              <button class="btn btn-warning" id="btn-show-hint" onclick="lab1Logic.showHint()" style="display:none; font-size:0.9rem; padding:8px 16px;">ヒントを見る</button>
+            </div>
+            <div id="lab1-challenge-hint" class="hint-box"></div>
+          </div>
+        </div>
+
+        <div id="lab1-challenge-feedback" class="feedback-message"></div>
+
+        <div class="teacher-note" id="lab1-challenge-teacher">
+          <!-- JSで挿入 -->
+        </div>
+
+        <div class="nav-buttons center">
+          <button class="btn" id="btn-next-challenge" style="display:none;" onclick="lab1Logic.nextChallenge()">次の問題へ</button>
+          <button class="btn btn-success" id="btn-finish-challenge" style="display:none;" onclick="app.navigate('lab1-final')">最後の体験へ</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab1-final" class="screen">
+      <div class="card">
+        <h2>LAB 1: 最後の体験</h2>
+        <p>尺度を間違えて扱うと、どんなおかしなことが起こるか見てみましょう。</p>
+
+        <div id="lab1-final-q1">
+          <div class="result-box">
+            <h3>問題A：背番号</h3>
+            <p>あるチームの選手の背番号が「10、20、30」でした。<br>平均を計算すると「20」になります。<br>では、<strong>『このチームの平均背番号は20です』</strong>という情報から、選手の特徴について意味のあることが分かるでしょうか？</p>
+            <div style="display:flex; gap:15px; margin-top:15px;">
+              <button class="btn btn-outline" onclick="lab1Logic.answerFinal('q1', '分かる')">分かる</button>
+              <button class="btn btn-outline" onclick="lab1Logic.answerFinal('q1', 'ほとんど分からない')">ほとんど分からない</button>
+            </div>
+            <div id="lab1-final-fb1" class="feedback-message"></div>
+          </div>
+        </div>
+
+        <div id="lab1-final-q2" style="display:none;">
+          <div class="result-box">
+            <h3>問題B：気温</h3>
+            <p>今日の気温は10℃、明日は20℃の予報です。<br><strong>「明日は今日の2倍の温度だね！」</strong>と言えるでしょうか？</p>
+            <div style="display:flex; gap:15px; margin-top:15px;">
+              <button class="btn btn-outline" onclick="lab1Logic.answerFinal('q2', '言える')">言える</button>
+              <button class="btn btn-outline" onclick="lab1Logic.answerFinal('q2', '言えない')">言えない</button>
+            </div>
+            <div id="lab1-final-fb2" class="feedback-message"></div>
+          </div>
+        </div>
+
+        <div id="lab1-final-q3" style="display:none;">
+          <div class="result-box">
+            <h3>問題C：経過時間</h3>
+            <p>動画Aの長さは10分、動画Bは20分です。<br><strong>「動画Bは動画Aの2倍の長さだね！」</strong>と言えるでしょうか？</p>
+            <div style="display:flex; gap:15px; margin-top:15px;">
+              <button class="btn btn-outline" onclick="lab1Logic.answerFinal('q3', '言える')">言える</button>
+              <button class="btn btn-outline" onclick="lab1Logic.answerFinal('q3', '言えない')">言えない</button>
+            </div>
+            <div id="lab1-final-fb3" class="feedback-message"></div>
+          </div>
+        </div>
+
+        <div id="lab1-final-summary" style="display:none; text-align:center; margin-top:30px;">
+          <h3 style="color:var(--primary-color);">データの尺度を知る一番の理由</h3>
+          <div class="large-text" style="background:var(--accent-color); color:white; padding:20px; border-radius:8px;">
+            ＝ そのデータに対して「してよい比較や計算」を正しく判断するため
+          </div>
+          
+          <div class="nav-buttons center">
+            <button class="btn" onclick="app.navigate('home')">ホームへ戻る</button>
+            <button class="btn btn-success" onclick="app.navigate('lab2-intro')">LAB 2へ進む</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         LAB 2: データの形を調べる
+    =========================================== -->
+    <div id="screen-lab2-intro" class="screen">
+      <div class="card">
+        <h2>LAB 2: データの形を調べる</h2>
+        <p>次の研究テーマです。</p>
+        <p>データには、コンピュータが扱いやすい「形」と、そうでない「形」があります。<br>次の画面で、いろいろなデータを2つのグループに分けてみましょう。</p>
+        
+        <div class="nav-buttons center">
+          <button class="btn" onclick="app.navigate('lab1-final')">戻る</button>
+          <button class="btn" onclick="app.navigate('lab2-classify')">分類してみる</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab2-classify" class="screen">
+      <div class="card">
+        <h2>整理しやすい？ しにくい？</h2>
+        <p>下のデータをタップして、「表として整理しやすい」か「そのままでは整理しにくい」か分類してください。</p>
+
+        <div class="classification-area">
+          <div class="class-box" id="class-structured">
+            <h4>表として整理しやすい</h4>
+            <div class="drop-zone" id="zone-structured"></div>
+          </div>
+          <div class="class-box" id="class-unstructured">
+            <h4>そのままでは整理しにくい</h4>
+            <div class="drop-zone" id="zone-unstructured"></div>
+          </div>
+        </div>
+
+        <div class="unclassified-area" id="unclassified-cards">
+          <!-- JSで生成 -->
+        </div>
+
+        <div id="lab2-classify-result" style="display:none; margin-top:30px;">
+          <h3 style="text-align:center; color:var(--success-color);">分類完了！</h3>
+          
+          <div style="display:flex; flex-wrap:wrap; gap:20px; margin-top:20px;">
+            <div style="flex:1; min-width:250px; background:#e8f4f8; padding:15px; border-radius:8px;">
+              <h3 style="margin-top:0; color:var(--primary-color);">構造化データ</h3>
+              <p>項目や形式が決まっていて、表の行・列などとして整理しやすいデータ。</p>
+              <p><small>例：生徒名簿、売上表、商品一覧</small></p>
+            </div>
+            <div style="flex:1; min-width:250px; background:#f9ebea; padding:15px; border-radius:8px;">
+              <h3 style="margin-top:0; color:var(--primary-color);">非構造化データ</h3>
+              <p>決まった表の形にそのまま当てはめにくいデータ。</p>
+              <p><small>例：画像、動画、音声、自由記述文章</small></p>
+            </div>
+          </div>
+
+          <div class="teacher-note">
+            <strong>教師用ヒント</strong>
+            「構造化データ＝Excelファイル」ではなく、「一定の規則に従って構造化されているデータ（CSVやJSON、データベースのテーブルなども含む）」であることを補足してください。
+          </div>
+
+          <div class="nav-buttons center">
+            <button class="btn btn-success" onclick="app.navigate('lab2-bigdata')">次へ進む</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab2-bigdata" class="screen">
+      <div class="card">
+        <h2>ビッグデータを体験</h2>
+        <p>ある人気のSNSでは、1日に次のようなデータが発生するとします。</p>
+        
+        <div class="result-box" style="background:#f4f6f7; border-color:#34495e;">
+          <ul style="list-style:none; font-size:1.1rem; line-height:2;">
+            <li>📝 <strong>投稿文：</strong> 数千万件</li>
+            <li>🖼️ <strong>画像：</strong> 数百万枚</li>
+            <li>🎥 <strong>動画：</strong> 大量</li>
+            <li>📍 <strong>位置情報：</strong> 毎秒発生</li>
+            <li>❤️ <strong>いいね：</strong> 大量かつ超高速に発生</li>
+          </ul>
+        </div>
+
+        <div class="large-text">
+          このデータを、普通の小さな表計算ソフトだけで<br>管理するのは簡単だと思う？
+        </div>
+
+        <div style="text-align:center;" id="lab2-bigdata-q">
+          <button class="btn btn-outline" onclick="document.getElementById('lab2-bigdata-ans').style.display='block'; this.parentElement.style.display='none';">簡単だと思う</button>
+          <button class="btn btn-outline" onclick="document.getElementById('lab2-bigdata-ans').style.display='block'; this.parentElement.style.display='none';">とても無理だと思う</button>
+        </div>
+
+        <div id="lab2-bigdata-ans" style="display:none;">
+          <div class="result-box" style="border-color:var(--success-color); background:#eafaf1;">
+            <p>正解は「とても無理」です。このようなデータは<strong>ビッグデータ</strong>と呼ばれます。</p>
+            <h3 style="color:#27ae60;">ビッグデータとは</h3>
+            <p>「非常に大量で、種類が多く、高速に発生するなど、従来の方法（単なる表計算など）だけでは扱うことが難しい大規模なデータ」のことです。</p>
+            
+            <div style="display:flex; justify-content:space-around; text-align:center; margin-top:20px; flex-wrap:wrap; gap:10px;">
+              <div style="background:white; padding:10px 20px; border-radius:8px; border:1px solid #ccc;">
+                <strong>Volume</strong><br>量
+              </div>
+              <div style="background:white; padding:10px 20px; border-radius:8px; border:1px solid #ccc;">
+                <strong>Variety</strong><br>種類（多様性）
+              </div>
+              <div style="background:white; padding:10px 20px; border-radius:8px; border:1px solid #ccc;">
+                <strong>Velocity</strong><br>速度・頻度
+              </div>
+            </div>
+            <p style="text-align:center; font-size:0.9rem; margin-top:10px; color:var(--text-light);">※これら3つの特徴（3V）を持つことが多いと言われます。</p>
+          </div>
+
+          <div class="nav-buttons center">
+            <button class="btn" onclick="app.navigate('home')">ホームへ戻る</button>
+            <button class="btn btn-success" onclick="app.navigate('lab3-intro')">LAB 3へ進む</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         LAB 3: データを安全に管理する
+    =========================================== -->
+    <div id="screen-lab3-intro" class="screen">
+      <div class="card">
+        <h2>LAB 3: データを安全に管理する</h2>
+        <h3 style="text-align:center; color:var(--danger-color);">ミッション：「ネットショップのデータを守れ！」</h3>
+        
+        <p>ネットショップや学校では、多くのデータを扱います。</p>
+        <table style="width:100%; border-collapse:collapse; margin:15px 0; background:white;">
+          <tr style="background:var(--primary-color); color:white;">
+            <th style="padding:10px; border:1px solid #ccc;">商品ID</th>
+            <th style="padding:10px; border:1px solid #ccc;">商品名</th>
+            <th style="padding:10px; border:1px solid #ccc;">価格</th>
+            <th style="padding:10px; border:1px solid #ccc;">在庫</th>
+          </tr>
+          <tr>
+            <td style="padding:10px; border:1px solid #ccc; text-align:center;">001</td>
+            <td style="padding:10px; border:1px solid #ccc;">限定スニーカー</td>
+            <td style="padding:10px; border:1px solid #ccc; text-align:right;">15,000円</td>
+            <td style="padding:10px; border:1px solid #ccc; text-align:center;">10</td>
+          </tr>
+          <tr>
+            <td style="padding:10px; border:1px solid #ccc; text-align:center;">002</td>
+            <td style="padding:10px; border:1px solid #ccc;">オリジナルTシャツ</td>
+            <td style="padding:10px; border:1px solid #ccc; text-align:right;">3,000円</td>
+            <td style="padding:10px; border:1px solid #ccc; text-align:center;">50</td>
+          </tr>
+        </table>
+
+        <p>このように、関連するデータを整理して保存し、必要に応じて検索・追加・更新できるようにした集まりを<strong>データベース</strong>と呼びます。</p>
+        
+        <div class="large-text">
+          では、大勢の人が同時にデータを使うと、<br>どんなトラブルが起こるでしょう？
+        </div>
+        <p style="text-align:center;">ここから4つのミニトラブルを体験します。</p>
+
+        <div class="nav-buttons center">
+          <button class="btn btn-success" onclick="app.navigate('lab3-t1')">トラブル1へ</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab3-t1" class="screen">
+      <div class="card">
+        <h2>トラブル 1：ありえないデータ？</h2>
+        <p>学校の成績データベースにデータを登録しようとしています。</p>
+        
+        <div class="result-box" style="text-align:center; background:white; border:2px solid #ccc;">
+          <p>科目：情報Ⅱ（<strong>100点満点</strong>）</p>
+          <div style="font-size:1.2rem; margin:10px 0;">
+            氏名：山田 太郎<br>
+            点数：<input type="text" value="120" readonly style="font-size:1.2rem; width:60px; text-align:center; color:red; font-weight:bold;"> 点
+          </div>
+        </div>
+
+        <p style="text-align:center; font-weight:bold;">問い：100点満点のテストに「120点」を登録してよいですか？</p>
+        
+        <div style="text-align:center;" id="lab3-t1-btns">
+          <button class="btn btn-outline" onclick="lab3Logic.answerT1('yes')">登録する</button>
+          <button class="btn btn-outline" onclick="lab3Logic.answerT1('no')">登録しない（エラーにする）</button>
+        </div>
+
+        <div id="lab3-t1-ans" style="display:none;">
+          <div class="feedback-message feedback-correct" style="display:block;">
+            正解：「登録しない（エラーにする）」が正しい処理です。<br>
+            100点満点なのに120点が入ると、データとして矛盾した状態になります。
+          </div>
+          
+          <div class="result-box">
+            <h3>🛡️ 整合性管理（せいごうせいかんり）</h3>
+            <p>データが決められたルール（例：点数は0～100まで）を守り、矛盾したおかしな状態にならないように管理する機能です。</p>
+          </div>
+
+          <div class="nav-buttons center">
+            <button class="btn btn-success" onclick="app.navigate('lab3-t2')">トラブル2へ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab3-t2" class="screen">
+      <div class="card">
+        <h2>トラブル 2：誰でも見られる？</h2>
+        
+        <div style="display:flex; justify-content:space-around; margin:20px 0; text-align:center;">
+          <div>🧑‍🎓<br>一般生徒</div>
+          <div>👨‍🏫<br>先生</div>
+          <div>👨‍💻<br>システム管理者</div>
+        </div>
+
+        <p style="text-align:center; font-weight:bold;">問い：学校の全生徒の「成績表データベース」を、誰でも自由に閲覧できてよいですか？</p>
+        
+        <div style="text-align:center;" id="lab3-t2-btns">
+          <button class="btn btn-outline" onclick="lab3Logic.answerT2('yes')">よい</button>
+          <button class="btn btn-outline" onclick="lab3Logic.answerT2('no')">だめ</button>
+        </div>
+
+        <div id="lab3-t2-ans" style="display:none;">
+          <div class="feedback-message feedback-correct" style="display:block;">
+            正解：だめです。個人情報が漏えいしてしまいます。
+          </div>
+          
+          <div class="result-box">
+            <h3>🔒 セキュリティ</h3>
+            <p>許可された人だけが、必要なデータを利用できるようにする機能です。</p>
+            <p><small>例：ID・パスワードでの認証、アクセス権限の設定（生徒は自分の分だけ、先生はクラス全員、など）、暗号化。</small></p>
+          </div>
+
+          <div class="nav-buttons center">
+            <button class="btn btn-success" onclick="app.navigate('lab3-t3')">トラブル3へ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab3-t3" class="screen">
+      <div class="card">
+        <h2>トラブル 3：同時に買ったら？</h2>
+        <p>ネットショップで、人気商品「限定スニーカー」の最後の1個を、ユーザーAとユーザーBが<strong>ほぼ同時</strong>に買おうとしています。</p>
+
+        <div style="text-align:center; margin-bottom:10px;">
+          <span style="background:var(--danger-color); color:white; padding:5px 15px; border-radius:20px; font-weight:bold;" id="lab3-t3-status">排他制御 OFF</span>
+        </div>
+
+        <div class="stock-simulation">
+          <div class="user-box">
+            <div>🧑‍🦱 ユーザーA</div>
+            <button class="btn" id="btn-buy-a" onclick="lab3Logic.buy('A')">購入する</button>
+            <div id="msg-a" style="margin-top:10px; font-weight:bold; height:24px;"></div>
+          </div>
+          
+          <div>
+            <div class="stock-box">
+              在庫<br><span id="stock-count">1</span>
+            </div>
+          </div>
+
+          <div class="user-box">
+            <div>👱‍♀️ ユーザーB</div>
+            <button class="btn" id="btn-buy-b" onclick="lab3Logic.buy('B')">購入する</button>
+            <div id="msg-b" style="margin-top:10px; font-weight:bold; height:24px;"></div>
+          </div>
+        </div>
+
+        <div id="lab3-t3-q" style="display:none; text-align:center;">
+          <p class="large-text" style="color:var(--danger-color);">在庫が「-1」になってしまいました！ 何が問題でしょう？</p>
+          <button class="btn btn-warning" onclick="lab3Logic.turnOnLock()">排他制御 ON にしてやり直す</button>
+          
+          <div class="teacher-note">
+            <strong>教師用ヒント</strong>
+            「在庫を確認する→減らす」という処理が、AさんとBさんで同時に進行してしまったためです。（Aが確認した時も1、Bが確認した時も1だったため、両方とも1-1を行ってしまった）
+          </div>
+        </div>
+
+        <div id="lab3-t3-ans" style="display:none;">
+          <div class="result-box">
+            <h3>🚦 排他制御（はいたせいぎょ）</h3>
+            <p>複数の利用者が同じデータを同時に変更しようとする時、矛盾が起きないように<strong>一方の処理が終わるまでもう一方を待たせる（ロックする）</strong>仕組みです。</p>
+          </div>
+          <div class="nav-buttons center">
+            <button class="btn btn-success" onclick="app.navigate('lab3-t4')">トラブル4へ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab3-t4" class="screen">
+      <div class="card">
+        <h2>トラブル 4：途中で止まったら？</h2>
+        <p>Aさんの口座からBさんの口座へ、1,000円を送金（振込）します。</p>
+
+        <div style="display:flex; justify-content:space-around; align-items:center; background:#fff; padding:20px; border:1px solid #ccc; border-radius:8px;">
+          <div style="text-align:center;">
+            <h4>Aさん口座</h4>
+            <div style="font-size:1.5rem;" id="t4-a-money">10,000円</div>
+          </div>
+          <div style="font-size:2rem; color:var(--accent-color);">▶︎ 1,000円送金 ▶︎</div>
+          <div style="text-align:center;">
+            <h4>Bさん口座</h4>
+            <div style="font-size:1.5rem;" id="t4-b-money">5,000円</div>
+          </div>
+        </div>
+
+        <div style="text-align:center; margin-top:20px;">
+          <button class="btn" id="btn-t4-start" onclick="lab3Logic.startTransfer()">送金処理スタート</button>
+        </div>
+
+        <div id="t4-error-msg" style="display:none; text-align:center; margin-top:20px;">
+          <h3 style="color:var(--danger-color);">💥 処理途中でサーバ障害発生！</h3>
+          <p>Aさんの口座からは1,000円引かれましたが、システムが停止してBさんの口座にはまだ足されていません。</p>
+          <p style="font-weight:bold;">問い：このままシステムを復旧させて再開してよいですか？</p>
+          
+          <button class="btn btn-outline" onclick="lab3Logic.answerT4('yes')">よい（そのままにする）</button>
+          <button class="btn btn-outline" onclick="lab3Logic.answerT4('no')">だめ（元に戻すか、処理を最後まで完了させる）</button>
+        </div>
+
+        <div id="lab3-t4-ans" style="display:none;">
+          <div class="feedback-message feedback-correct" style="display:block;">
+            正解：「だめ」です。1,000円がどこかに消えてしまいます！
+          </div>
+          <p style="text-align:center;">システムが自動で正しい状態（今回は最初からやり直し）に回復させます。</p>
+          
+          <div class="result-box">
+            <h3>🏥 障害回復（しょうがいかいふく）</h3>
+            <p>システムに障害が発生して処理が途中で止まってしまった場合でも、データを矛盾のない<strong>正しい状態に戻せるようにする</strong>仕組みです。</p>
+          </div>
+          <div class="nav-buttons center">
+            <button class="btn btn-success" onclick="app.navigate('lab3-dbms')">次へ進む</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab3-dbms" class="screen">
+      <div class="card">
+        <h2>データベース管理システム（DBMS）</h2>
+        <p>ここまで4つのトラブルを見てきました。</p>
+        <p>これらのルールや仕組みを、人間が毎回手作業でプログラムを作って管理するのは非常に大変です。</p>
+        
+        <div class="result-box" style="background:#eafaf1; border-color:var(--success-color);">
+          <p>そこで、データベースを安全・便利に使うための専用ソフトウェアが活躍します。<br>
+          これを <strong>DBMS（Database Management System：データベース管理システム）</strong> と呼びます。</p>
+        </div>
+
+        <div class="dbms-diagram">
+          <div class="dbms-core">DBMS<br><small style="font-weight:normal;">データベース管理システム</small></div>
+          <div class="dbms-feature">🛡️ 整合性管理<br><small>矛盾を防ぐ</small></div>
+          <div class="dbms-feature">🔒 セキュリティ<br><small>権限を守る</small></div>
+          <div class="dbms-feature">🚦 排他制御<br><small>同時実行を守る</small></div>
+          <div class="dbms-feature">🏥 障害回復<br><small>故障から直す</small></div>
+        </div>
+
+        <div class="nav-buttons center">
+          <button class="btn btn-success" onclick="app.navigate('lab3-challenge')">最終チャレンジへ</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-lab3-challenge" class="screen">
+      <div class="card">
+        <h2>最終チャレンジ</h2>
+        <p>今日の学びの総復習です。状況に合わせて正しい言葉を選んでください。</p>
+        
+        <div style="text-align: right; margin-bottom: 10px;">
+          <span id="final-challenge-progress">問題 1 / 5</span>
+        </div>
+
+        <div class="result-box" style="background:white; border:2px solid var(--primary-color);">
+          <h3 id="final-challenge-q" style="margin-top:0;">問題文</h3>
+        </div>
+
+        <div id="final-challenge-options" style="display:flex; flex-direction:column; gap:10px; max-width:400px; margin:0 auto;">
+          <!-- JSで生成 -->
+        </div>
+
+        <div id="final-challenge-feedback" class="feedback-message"></div>
+
+        <div class="nav-buttons center">
+          <button class="btn" id="btn-next-final" style="display:none;" onclick="finalChallengeLogic.next()">次の問題へ</button>
+          <button class="btn btn-success" id="btn-finish-all" style="display:none;" onclick="app.navigate('summary')">まとめを見る</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         まとめ・振り返り
+    =========================================== -->
+    <div id="screen-summary" class="screen">
+      <div class="card">
+        <h2>まとめ：データとの付き合い方</h2>
+        
+        <div style="background:#fff; padding:20px; border-radius:10px; border:1px solid #ddd; margin-bottom:20px;">
+          <h3 style="color:var(--secondary-color); text-align:center; margin-top:0;">データのライフサイクル</h3>
+          
+          <div style="text-align:center; padding:10px; margin-bottom:5px; background:#e8f4f8; border-radius:5px;">
+            <strong>① データの性質を考える</strong><br>
+            <small>質的 / 量的、名義 / 順序 / 間隔 / 比例</small>
+          </div>
+          <div style="text-align:center; color:#7f8c8d;">↓</div>
+          <div style="text-align:center; padding:10px; margin-bottom:5px; background:#e8f4f8; border-radius:5px;">
+            <strong>② データの形を考える</strong><br>
+            <small>構造化 / 非構造化、ビッグデータ</small>
+          </div>
+          <div style="text-align:center; color:#7f8c8d;">↓</div>
+          <div style="text-align:center; padding:10px; margin-bottom:5px; background:#e8f4f8; border-radius:5px;">
+            <strong>③ データを保存する</strong><br>
+            <small>データベース</small>
+          </div>
+          <div style="text-align:center; color:#7f8c8d;">↓</div>
+          <div style="text-align:center; padding:10px; background:#e8f4f8; border-radius:5px;">
+            <strong>④ データを安全に管理する</strong><br>
+            <small>DBMS（整合性、セキュリティ、排他制御、障害回復）</small>
+          </div>
+        </div>
+
+        <div class="large-text">
+          データは、集めるだけでは役に立たない。<br>
+          性質を理解し、適切な形で整理し、<br>
+          安全かつ正しく管理することが大切。
+        </div>
+
+        <div class="nav-buttons center">
+          <button class="btn btn-success" onclick="app.navigate('reflection')">振り返りへ</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-reflection" class="screen">
+      <div class="card">
+        <h2>振り返り</h2>
+        <p>今日の学習で、最初より分かるようになったものをチェックしましょう。（複数選択可）</p>
+
+        <form class="reflection-form" onsubmit="event.preventDefault(); showReflectionResult();">
+          <div class="checkbox-group">
+            <label><input type="checkbox" name="learned"> 質的データ・量的データの違い</label>
+            <label><input type="checkbox" name="learned"> 4つの尺度（名義・順序・間隔・比例）</label>
+            <label><input type="checkbox" name="learned"> 構造化・非構造化データ</label>
+            <label><input type="checkbox" name="learned"> ビッグデータとは何か</label>
+            <label><input type="checkbox" name="learned"> データベースの意味</label>
+            <label><input type="checkbox" name="learned"> DBMSの4つの機能</label>
+          </div>
+
+          <p style="margin-top:20px;">一番「なるほど」と思ったこと、または疑問に思ったことを1文で書いてみましょう。</p>
+          <textarea id="reflection-text" placeholder="例：背番号が足し算できないデータ（名義尺度）だということに納得した。"></textarea>
+
+          <div style="text-align:center; margin-top:20px;">
+            <button type="submit" class="btn btn-success btn-large">振り返りを記録する</button>
+          </div>
+        </form>
+
+        <div id="reflection-result" class="reflection-result">
+          <h3 style="color:var(--success-color); margin-top:0;">お疲れ様でした！</h3>
+          <p>あなたの記録：</p>
+          <p id="res-checks" style="font-weight:bold;"></p>
+          <div style="background:white; padding:15px; border-radius:5px; border:1px solid #ccc; font-style:italic;" id="res-text"></div>
+          <p style="margin-top:20px; font-size:0.9rem; color:var(--text-light);">※入力内容は送信されません。この画面を閉じるかリロードすると消去されます。</p>
+          
+          <div style="text-align:center; margin-top:20px;">
+            <button class="btn btn-outline" onclick="location.reload()">最初からやり直す (リセット)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    /* ==========================================
+       【問題データ定義】
+       ※ここを変更すると問題を追加・修正できます
+    ========================================== */
+
+    // LAB 1 最初の予想アンケート
+    const lab1SurveyData = [
+      { id: "blood", name: "血液型", ex: "A, B, O, AB", exp_scale: "名義尺度", 
+        ans: { group: "yes", order: "no", diff: "no", ratio: "no" },
+        desc: "A型とB型のように種類を分けることはできますが、A型よりB型の方が大きい、という順番はありません。" },
+      { id: "sat", name: "満足度", ex: "1, 2, 3, 4, 5", exp_scale: "順序尺度", 
+        ans: { group: "yes", order: "yes", diff: "no", ratio: "no" },
+        desc: "1より5の方が満足度が高いという順番には意味があります。しかし、1から2への変化と、4から5への変化がまったく同じ大きさ（差）とは限りません。" },
+      { id: "temp", name: "気温（℃）", ex: "10℃, 20℃", exp_scale: "間隔尺度", 
+        ans: { group: "yes", order: "yes", diff: "yes", ratio: "no" },
+        desc: "10℃から20℃は10℃上がった、と差を考えることができます。しかし、摂氏0℃は「温度がない」わけではないため、20℃を10℃の2倍の温度とは考えません。" },
+      { id: "time", name: "経過時間", ex: "10分, 20分", exp_scale: "比例尺度", 
+        ans: { group: "yes", order: "yes", diff: "yes", ratio: "yes" },
+        desc: "20分は10分より10分長く（差）、さらに10分の2倍の長さ（比）と言うことができます。0分は「時間がない状態」だからです。" }
+    ];
+
+    // LAB 1 チャレンジ
+    const lab1ChallengeData = [
+      { word: "都道府県名", type: "質的", scale: "名義", hints: ["五十音順に並べることはできても、県そのものに大小の順番はないよ。"] },
+      { word: "レースの着順（1着、2着…）", type: "質的", scale: "順序", hints: ["1着と2着の差（タイム）と、2着と3着の差は、必ずしも同じとは限らないよ。"] },
+      { word: "西暦（2000年、2024年…）", type: "質的", scale: "間隔", type_alt: "量的", /* 西暦は間隔尺度で通常量的として扱うが解釈が分かれる場合あり。情報科では間隔尺度＝量的 */ hints: ["2024年は2000年の24年後（差）だけど、西暦0年は「時間がない」わけではないので、2倍とは言えないよ。"] },
+      { word: "商品の価格", type: "量的", scale: "比例", hints: ["0円は「価格がない」ことを意味するし、200円は100円の2倍と言えるよね。"] },
+      { word: "スポーツの背番号", type: "質的", scale: "名義", hints: ["背番号10番は、5番の選手の2倍すごいわけではないし、順番を表すものでもないよ。名前の代わりだね。"] },
+      { word: "身長", type: "量的", scale: "比例", hints: ["0cmは長さがない状態で、160cmは80cmの2倍と言えるね。"] }
+    ];
+    // 西暦のtype_alt調整（基本は量的とする）
+    lab1ChallengeData[2].type = "量的"; 
+
+    // LAB 2 データ分類
+    const lab2Data = [
+      { id: "c1", text: "学校の生徒名簿", type: "structured" },
+      { id: "c2", text: "コンビニの売上表", type: "structured" },
+      { id: "c3", text: "SNSの投稿写真", type: "unstructured" },
+      { id: "c4", text: "動画ファイル", type: "unstructured" },
+      { id: "c5", text: "音声データ", type: "unstructured" },
+      { id: "c6", text: "自由記述アンケート", type: "unstructured" },
+      { id: "c7", text: "商品の一覧表", type: "structured" },
+      { id: "c8", text: "成績一覧表", type: "structured" }
+    ];
+
+    // LAB 3 最終チャレンジ
+    const finalChallengeData = [
+      {
+        q: "アンケートの「とても不満 ～ とても満足」のように、大小の順番には意味があるが、差の大きさが一定とは限らないデータは何尺度？",
+        options: ["名義尺度", "順序尺度", "間隔尺度", "比例尺度"],
+        ans: 1, // 0-indexed
+        exp: "順番には意味がありますが、差（例えば「不満」から「普通」への変化量）は数値化して比較できないため、順序尺度です。"
+      },
+      {
+        q: "大量の写真、動画、自由記述の文章など、そのままでは表として整理しにくいデータを何と呼ぶ？",
+        options: ["構造化データ", "非構造化データ", "量的データ", "間隔尺度"],
+        ans: 1,
+        exp: "形式が決まっておらず、表に当てはめにくいものは非構造化データと呼ばれます。"
+      },
+      {
+        q: "在庫1個の商品を、2人のユーザーが同時に購入しようとした。在庫がマイナスになることを防ぐために必要なDBMSの機能はどれ？",
+        options: ["整合性管理", "セキュリティ", "排他制御", "障害回復"],
+        ans: 2,
+        exp: "複数の人が同時にデータを変更しようとした時、矛盾が起きないように待たせる仕組みは「排他制御」です。"
+      },
+      {
+        q: "100点満点の試験データに、誤って「150点」というありえない数値が登録されることを防ぐ機能はどれ？",
+        options: ["整合性管理", "セキュリティ", "排他制御", "障害回復"],
+        ans: 0,
+        exp: "データが決められたルール（0〜100）を守り、矛盾した状態にならないように管理するのは「整合性管理」です。"
+      },
+      {
+        q: "データベースの更新作業中（銀行の振込中など）にシステムが停止してしまった。正しい状態へ戻すために必要な機能はどれ？",
+        options: ["整合性管理", "セキュリティ", "排他制御", "障害回復"],
+        ans: 3,
+        exp: "障害発生時に、データを矛盾のない正しい状態（変更前など）に復旧させる機能は「障害回復」です。"
+      }
+    ];
+
+    /* ==========================================
+       アプリケーション状態管理
+    ========================================== */
+    const app = {
+      screens: [
+        "home", "lab1-intro", "lab1-survey", "lab1-result", "lab1-type", "lab1-challenge", "lab1-final",
+        "lab2-intro", "lab2-classify", "lab2-bigdata",
+        "lab3-intro", "lab3-t1", "lab3-t2", "lab3-t3", "lab3-t4", "lab3-dbms", "lab3-challenge",
+        "summary", "reflection"
+      ],
+      navigate: function(screenId) {
+        // すべての画面を非表示
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        // 指定画面を表示
+        const target = document.getElementById('screen-' + screenId);
+        if(target) {
+          target.classList.add('active');
+          window.scrollTo(0,0);
+        }
+        this.updateProgress(screenId);
+        
+        // 画面ごとの初期化呼び出し
+        if(screenId === 'lab1-challenge') lab1Logic.initChallenge();
+        if(screenId === 'lab2-classify') lab2Logic.initClassify();
+        if(screenId === 'lab3-challenge') finalChallengeLogic.init();
+      },
+      updateProgress: function(screenId) {
+        const pd = document.getElementById('progress-display');
+        if(screenId === 'home') pd.innerText = "Home";
+        else if(screenId.startsWith('lab1')) pd.innerText = "LAB 1 / 3";
+        else if(screenId.startsWith('lab2')) pd.innerText = "LAB 2 / 3";
+        else if(screenId.startsWith('lab3')) pd.innerText = "LAB 3 / 3";
+        else if(screenId === 'summary' || screenId === 'reflection') pd.innerText = "まとめ";
+      }
+    };
+
+    /* ==========================================
+       LAB 1 ロジック
+    ========================================== */
+    const lab1Logic = {
+      surveyAnswers: {},
+      initSurvey: function() {
+        const container = document.getElementById('lab1-survey-container');
+        const resContainer = document.getElementById('lab1-result-container');
+        container.innerHTML = '';
+        resContainer.innerHTML = '';
+
+        lab1SurveyData.forEach((data, index) => {
+          this.surveyAnswers[data.id] = { group:null, order:null, diff:null, ratio:null };
+          
+          // 調査用UI生成
+          const item = document.createElement('div');
+          item.className = 'survey-item';
+          item.innerHTML = `
+            <h4>${data.name}<br><small style="font-weight:normal; color:#777;">例: ${data.ex}</small></h4>
+            ${this.createQuestionRow(data.id, 'group', 'グループ分けできる？')}
+            ${this.createQuestionRow(data.id, 'order', '順番に意味がある？')}
+            ${this.createQuestionRow(data.id, 'diff', '差の大きさに意味がある？')}
+            ${this.createQuestionRow(data.id, 'ratio', '2倍・半分と言える？')}
+          `;
+          container.appendChild(item);
+
+          // 結果用UI生成（最初は隠しておく）
+          const resItem = document.createElement('div');
+          resItem.className = 'result-box';
+          resItem.innerHTML = `
+            <h3 style="margin-top:0;">【${data.name}】 → <span style="color:var(--danger-color);">${data.exp_scale}</span></h3>
+            <p style="margin-bottom:10px; font-size:0.9rem;">
+              分類：${data.ans.group === 'yes' ? '○' : '×'} / 
+              順番：${data.ans.order === 'yes' ? '○' : '×'} / 
+              差：${data.ans.diff === 'yes' ? '○' : '×'} / 
+              比：${data.ans.ratio === 'yes' ? '○' : '×'}
+            </p>
+            <p style="margin:0;">解説：${data.desc}</p>
+          `;
+          resContainer.appendChild(resItem);
+        });
+      },
+      createQuestionRow: function(dataId, qId, text) {
+        return `
+          <div class="question-row">
+            <span>${text}</span>
+            <div class="options-group">
+              <button class="option-btn" onclick="lab1Logic.selectSurvey('${dataId}','${qId}','yes', this)">○ できる</button>
+              <button class="option-btn" onclick="lab1Logic.selectSurvey('${dataId}','${qId}','maybe', this)">△ 迷う</button>
+              <button class="option-btn" onclick="lab1Logic.selectSurvey('${dataId}','${qId}','no', this)">× できない</button>
+            </div>
+          </div>
+        `;
+      },
+      selectSurvey: function(dataId, qId, val, btnEl) {
+        this.surveyAnswers[dataId][qId] = val;
+        
+        // ボタンスタイル更新
+        const siblings = btnEl.parentElement.children;
+        for(let i=0; i<siblings.length; i++) {
+          siblings[i].className = 'option-btn';
+        }
+        btnEl.classList.add(`selected-${val}`);
+
+        this.checkSurveyComplete();
+      },
+      checkSurveyComplete: function() {
+        let allAnswered = true;
+        for(const did in this.surveyAnswers) {
+          for(const qid in this.surveyAnswers[did]) {
+            if(this.surveyAnswers[did][qid] === null) allAnswered = false;
+          }
+        }
+        document.getElementById('btn-lab1-survey-result').disabled = !allAnswered;
+      },
+
+      challengeIndex: 0,
+      currentHintIndex: 0,
+      initChallenge: function() {
+        this.challengeIndex = 0;
+        this.loadChallenge();
+      },
+      loadChallenge: function() {
+        const data = lab1ChallengeData[this.challengeIndex];
+        document.getElementById('lab1-challenge-progress').innerText = `問題 ${this.challengeIndex + 1} / ${lab1ChallengeData.length}`;
+        document.getElementById('lab1-challenge-word').innerText = data.word;
+        
+        // UI初期化
+        document.getElementById('lab1-challenge-step2').style.display = 'none';
+        document.getElementById('lab1-challenge-feedback').style.display = 'none';
+        document.getElementById('lab1-challenge-hint').style.display = 'none';
+        document.getElementById('btn-show-hint').style.display = 'none';
+        document.getElementById('btn-next-challenge').style.display = 'none';
+        document.getElementById('btn-finish-challenge').style.display = 'none';
+        this.currentHintIndex = 0;
+
+        // 教師用メモ
+        document.getElementById('lab1-challenge-teacher').innerHTML = `
+          <strong>教師用正解</strong>
+          [質的/量的]：${data.type}<br>
+          [尺度]：${data.scale}尺度
+        `;
+      },
+      checkChallenge1: function(ans) {
+        const data = lab1ChallengeData[this.challengeIndex];
+        const fb = document.getElementById('lab1-challenge-feedback');
+        if(ans === data.type) {
+          fb.className = 'feedback-message feedback-correct';
+          fb.innerHTML = `○ 正解！「${data.type}データ」です。<br>では、どの尺度でしょうか？`;
+          fb.style.display = 'block';
+          document.getElementById('lab1-challenge-step2').style.display = 'block';
+        } else {
+          fb.className = 'feedback-message feedback-incorrect';
+          fb.innerHTML = `△ もう一度考えよう。<br>数値の大小や計算に意味があるか考えてみましょう。`;
+          fb.style.display = 'block';
+        }
+      },
+      checkChallenge2: function(ans) {
+        const data = lab1ChallengeData[this.challengeIndex];
+        const fb = document.getElementById('lab1-challenge-feedback');
+        if(ans === data.scale) {
+          fb.className = 'feedback-message feedback-correct';
+          fb.innerHTML = `○ 大正解！「${data.scale}尺度」です。`;
+          fb.style.display = 'block';
+          document.getElementById('btn-show-hint').style.display = 'none';
+          document.getElementById('lab1-challenge-hint').style.display = 'none';
+          
+          if(this.challengeIndex < lab1ChallengeData.length - 1) {
+            document.getElementById('btn-next-challenge').style.display = 'inline-block';
+          } else {
+            document.getElementById('btn-finish-challenge').style.display = 'inline-block';
+          }
+        } else {
+          fb.className = 'feedback-message feedback-incorrect';
+          fb.innerHTML = `△ 残念、「${ans}尺度」ではありません。`;
+          fb.style.display = 'block';
+          document.getElementById('btn-show-hint').style.display = 'inline-block';
+        }
+      },
+      showHint: function() {
+        const data = lab1ChallengeData[this.challengeIndex];
+        const hintBox = document.getElementById('lab1-challenge-hint');
+        
+        if(this.currentHintIndex < data.hints.length) {
+          hintBox.style.display = 'block';
+          hintBox.innerText = `💡 ヒント: ${data.hints[this.currentHintIndex]}`;
+          this.currentHintIndex++;
+        }
+        if(this.currentHintIndex >= data.hints.length) {
+          document.getElementById('btn-show-hint').style.display = 'none';
+        }
+      },
+      nextChallenge: function() {
+        this.challengeIndex++;
+        this.loadChallenge();
+      },
+
+      answerFinal: function(qid, ans) {
+        let fb, correct, exp;
+        if(qid === 'q1') {
+          fb = document.getElementById('lab1-final-fb1');
+          correct = (ans === 'ほとんど分からない');
+          exp = "背番号は「名義尺度」であり、数字は量ではなく選手を区別するラベル（名前）として使われているからです。平均を計算しても意味がありません。";
+        } else if(qid === 'q2') {
+          fb = document.getElementById('lab1-final-fb2');
+          correct = (ans === '言えない');
+          exp = "気温（摂氏）は「間隔尺度」です。0℃は「温度がない」わけではないため、差（＋10℃）には意味がありますが、比（2倍）には意味がありません。";
+        } else if(qid === 'q3') {
+          fb = document.getElementById('lab1-final-fb3');
+          correct = (ans === '言える');
+          exp = "経過時間は「比例尺度」です。0分は時間が全くない状態を表すため、20分は10分の2倍の長さだと言えます。";
+        }
+
+        if(correct) {
+          fb.className = 'feedback-message feedback-correct';
+          fb.innerHTML = `○ 正解！<br>${exp}`;
+        } else {
+          fb.className = 'feedback-message feedback-incorrect';
+          fb.innerHTML = `△ 考え直してみよう。<br>${exp}`;
+        }
+        fb.style.display = 'block';
+
+        // 次の問題を表示
+        if(qid === 'q1' && correct) document.getElementById('lab1-final-q2').style.display = 'block';
+        if(qid === 'q2' && correct) document.getElementById('lab1-final-q3').style.display = 'block';
+        if(qid === 'q3' && correct) document.getElementById('lab1-final-summary').style.display = 'block';
+      }
+    };
+
+    /* ==========================================
+       LAB 2 ロジック
+    ========================================== */
+    const lab2Logic = {
+      unclassifiedCount: 0,
+      initClassify: function() {
+        const container = document.getElementById('unclassified-cards');
+        const zoneS = document.getElementById('zone-structured');
+        const zoneU = document.getElementById('zone-unstructured');
+        container.innerHTML = '';
+        zoneS.innerHTML = '';
+        zoneU.innerHTML = '';
+        document.getElementById('lab2-classify-result').style.display = 'none';
+
+        // データをシャッフル
+        const shuffled = [...lab2Data].sort(() => 0.5 - Math.random());
+        this.unclassifiedCount = shuffled.length;
+
+        shuffled.forEach(data => {
+          const card = document.createElement('div');
+          card.className = 'data-card';
+          card.innerText = data.text;
+          card.onclick = () => this.handleCardClick(card, data.type);
+          container.appendChild(card);
+        });
+      },
+      handleCardClick: function(cardEl, correctType) {
+        // 簡単のため、タップしたらユーザーに聞いて振り分けるUIにする
+        // ブラウザの標準confirmは禁止されているので、カスタムのボタンで処理する方が良いが、
+        // 今回はシンプルに、順番に「整理しやすい」「しにくい」ボタンをカードの下に出す方式を採用するか、
+        // あるいは自動で正解なら移動、不正解ならブルッと震えるアニメーション等。
+        
+        // ここではクリックされたら正解の箱に入る簡単なゲーム形式とする。（学習テンポ優先）
+        // 実際の授業では「どっちだと思う？」と考えさせながらタップさせる。
+        
+        const isStructured = confirmCustomPrompt(cardEl.innerText);
+        // 今回はprompt/confirm禁止ルールがあるため、HTML上にボタンを出す実装に変更する。
+        // が、指示によりアラート禁止なので、カードをタップすると選択肢がポップアップする擬似UIを作る。
+      }
+    };
+    
+    // LAB 2 のカードクリック処理の修正版（confirm禁止対応）
+    lab2Logic.selectedCard = null;
+    lab2Logic.selectedCardData = null;
+    lab2Logic.handleCardClick = function(cardEl, correctType) {
+      // 既存のポップアップがあれば消す
+      const existing = document.getElementById('classify-popup');
+      if(existing) existing.remove();
+
+      this.selectedCard = cardEl;
+      this.selectedCardData = correctType;
+
+      const popup = document.createElement('div');
+      popup.id = 'classify-popup';
+      popup.style.marginTop = '10px';
+      popup.innerHTML = `
+        <button class="btn btn-outline" style="padding:5px 10px; font-size:0.9rem;" onclick="lab2Logic.attemptClassify('structured')">整理しやすい</button>
+        <button class="btn btn-outline" style="padding:5px 10px; font-size:0.9rem;" onclick="lab2Logic.attemptClassify('unstructured')">整理しにくい</button>
+      `;
+      cardEl.appendChild(popup);
+    };
+
+    lab2Logic.attemptClassify = function(guess) {
+      if(guess === this.selectedCardData) {
+        // 正解 -> 移動
+        const popup = document.getElementById('classify-popup');
+        if(popup) popup.remove();
+        
+        const targetZone = guess === 'structured' ? document.getElementById('zone-structured') : document.getElementById('zone-unstructured');
+        targetZone.appendChild(this.selectedCard);
+        this.selectedCard.onclick = null; // クリック解除
+        this.selectedCard.style.cursor = 'default';
+        this.selectedCard.style.backgroundColor = '#eafaf1';
+
+        this.unclassifiedCount--;
+        if(this.unclassifiedCount === 0) {
+          document.getElementById('lab2-classify-result').style.display = 'block';
+        }
+      } else {
+        // 不正解 -> 揺らす
+        const popup = document.getElementById('classify-popup');
+        if(popup) popup.innerHTML = `<span style="color:red; font-size:0.9rem; font-weight:bold;">違います！</span>`;
+        setTimeout(() => {
+          if(popup && popup.parentElement) popup.remove();
+        }, 1000);
+      }
+    };
+
+    /* ==========================================
+       LAB 3 ロジック
+    ========================================== */
+    const lab3Logic = {
+      // Trouble 1
+      answerT1: function(ans) {
+        document.getElementById('lab3-t1-btns').style.display = 'none';
+        document.getElementById('lab3-t1-ans').style.display = 'block';
+      },
+      // Trouble 2
+      answerT2: function(ans) {
+        document.getElementById('lab3-t2-btns').style.display = 'none';
+        document.getElementById('lab3-t2-ans').style.display = 'block';
+      },
+      
+      // Trouble 3 (排他制御)
+      t3Stock: 1,
+      t3LockOn: false,
+      t3Processing: false,
+      buy: function(user) {
+        const msgEl = document.getElementById(`msg-${user.toLowerCase()}`);
+        const stockEl = document.getElementById('stock-count');
+        
+        if(!this.t3LockOn) {
+          // ロックなし：両方買えてしまってマイナスになる
+          this.t3Stock--;
+          stockEl.innerText = this.t3Stock;
+          msgEl.style.color = 'var(--success-color)';
+          msgEl.innerText = '購入成功！';
+          if(this.t3Stock < 0) {
+            stockEl.className = 'stock-danger';
+            document.getElementById('lab3-t3-q').style.display = 'block';
+          }
+        } else {
+          // ロックあり：一方が処理中は他方は弾かれる
+          if(this.t3Processing) {
+            msgEl.style.color = 'var(--danger-color)';
+            msgEl.innerText = '他の人が処理中です';
+            return;
+          }
+          if(this.t3Stock <= 0) {
+            msgEl.style.color = 'var(--danger-color)';
+            msgEl.innerText = '在庫なし';
+            return;
+          }
+
+          this.t3Processing = true;
+          msgEl.style.color = 'var(--warning-color)';
+          msgEl.innerText = '処理中...';
+
+          setTimeout(() => {
+            this.t3Stock--;
+            stockEl.innerText = this.t3Stock;
+            msgEl.style.color = 'var(--success-color)';
+            msgEl.innerText = '購入成功！';
+            this.t3Processing = false;
+            
+            // 少し遅れて正解エリア表示
+            setTimeout(() => {
+              document.getElementById('lab3-t3-q').style.display = 'none';
+              document.getElementById('lab3-t3-ans').style.display = 'block';
+            }, 1000);
+          }, 1000); // 1秒間ロック
+        }
+      },
+      turnOnLock: function() {
+        this.t3LockOn = true;
+        this.t3Stock = 1;
+        document.getElementById('stock-count').innerText = 1;
+        document.getElementById('stock-count').className = '';
+        document.getElementById('msg-a').innerText = '';
+        document.getElementById('msg-b').innerText = '';
+        const statusEl = document.getElementById('lab3-t3-status');
+        statusEl.innerText = '排他制御 ON';
+        statusEl.style.background = 'var(--success-color)';
+        document.getElementById('lab3-t3-q').style.display = 'none';
+      },
+
+      // Trouble 4 (障害回復)
+      startTransfer: function() {
+        document.getElementById('btn-t4-start').disabled = true;
+        document.getElementById('t4-a-money').innerText = "9,000円";
+        document.getElementById('t4-a-money').style.color = "var(--danger-color)";
+        
+        setTimeout(() => {
+          // 障害発生！
+          document.getElementById('t4-error-msg').style.display = 'block';
+        }, 1000);
+      },
+      answerT4: function(ans) {
+        document.getElementById('t4-error-msg').style.display = 'none';
+        document.getElementById('lab3-t4-ans').style.display = 'block';
+        
+        // 自動回復（ロールバック）を視覚化
+        document.getElementById('t4-a-money').innerText = "10,000円";
+        document.getElementById('t4-a-money').style.color = "inherit";
+      }
+    };
+
+    /* ==========================================
+       最終チャレンジ・振り返り ロジック
+    ========================================== */
+    const finalChallengeLogic = {
+      index: 0,
+      init: function() {
+        this.index = 0;
+        this.load();
+      },
+      load: function() {
+        const data = finalChallengeData[this.index];
+        document.getElementById('final-challenge-progress').innerText = `問題 ${this.index + 1} / ${finalChallengeData.length}`;
+        document.getElementById('final-challenge-q').innerText = data.q;
+        
+        const optionsContainer = document.getElementById('final-challenge-options');
+        optionsContainer.innerHTML = '';
+        
+        data.options.forEach((opt, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-outline btn-large';
+          btn.style.margin = '0 auto';
+          btn.innerText = opt;
+          btn.onclick = () => this.check(i, btn);
+          optionsContainer.appendChild(btn);
+        });
+
+        document.getElementById('final-challenge-feedback').style.display = 'none';
+        document.getElementById('btn-next-final').style.display = 'none';
+        document.getElementById('btn-finish-all').style.display = 'none';
+      },
+      check: function(selectedIndex, btnEl) {
+        const data = finalChallengeData[this.index];
+        const fb = document.getElementById('final-challenge-feedback');
+        
+        // 全ボタン無効化
+        const btns = document.getElementById('final-challenge-options').children;
+        for(let i=0; i<btns.length; i++) {
+          btns[i].disabled = true;
+          if(i === data.ans) btns[i].className = 'btn btn-success btn-large';
+          else if(i === selectedIndex) btns[i].className = 'btn btn-danger btn-large';
+        }
+
+        if(selectedIndex === data.ans) {
+          fb.className = 'feedback-message feedback-correct';
+          fb.innerHTML = `○ 正解！<br><span style="font-weight:normal;">${data.exp}</span>`;
+        } else {
+          fb.className = 'feedback-message feedback-incorrect';
+          fb.innerHTML = `× 残念。正解は「${data.options[data.ans]}」です。<br><span style="font-weight:normal;">${data.exp}</span>`;
+        }
+        fb.style.display = 'block';
+
+        if(this.index < finalChallengeData.length - 1) {
+          document.getElementById('btn-next-final').style.display = 'inline-block';
+        } else {
+          document.getElementById('btn-finish-all').style.display = 'inline-block';
+        }
+      },
+      next: function() {
+        this.index++;
+        this.load();
+      }
+    };
+
+    function showReflectionResult() {
+      const checks = document.querySelectorAll('input[name="learned"]:checked');
+      const text = document.getElementById('reflection-text').value;
+      
+      let checkList = [];
+      checks.forEach(c => checkList.push(c.parentElement.innerText.trim()));
+      
+      document.getElementById('res-checks').innerHTML = checkList.length > 0 ? "☑ " + checkList.join("<br>☑ ") : "選択なし";
+      document.getElementById('res-text').innerText = text || "（入力なし）";
+      
+      document.getElementById('reflection-result').style.display = 'block';
+    }
+
+    // 教師モード用パスワード管理
+    const teacherModal = {
+      password: "teacher161", // ここを変更するとパスワードを変更できます
+      open: function() {
+        document.getElementById('teacher-password').value = '';
+        document.getElementById('teacher-modal-error').style.display = 'none';
+        document.getElementById('teacher-modal').style.display = 'flex';
+        // 開いた時に自動でフォーカスを当てる
+        setTimeout(() => document.getElementById('teacher-password').focus(), 100);
+      },
+      close: function() {
+        document.getElementById('teacher-modal').style.display = 'none';
+      },
+      check: function() {
+        const input = document.getElementById('teacher-password').value;
+        if(input === this.password) {
+          this.close();
+          document.body.classList.add('teacher-mode');
+          const btn = document.getElementById('teacher-mode-btn');
+          btn.innerText = '教師モード ON';
+          btn.classList.add('active');
+        } else {
+          document.getElementById('teacher-modal-error').style.display = 'block';
+        }
+      }
+    };
+
+    // エンターキーでも判定できるようにする
+    document.getElementById('teacher-password').addEventListener('keypress', function(e) {
+      if(e.key === 'Enter') teacherModal.check();
+    });
+
+    // 教師モード切り替え
+    document.getElementById('teacher-mode-btn').addEventListener('click', function() {
+      if(document.body.classList.contains('teacher-mode')) {
+        // ONの場合はすぐにOFFにする（パスワード不要）
+        document.body.classList.remove('teacher-mode');
+        this.innerText = '教師モード OFF';
+        this.classList.remove('active');
+      } else {
+        // OFFの場合はパスワード入力画面を開く
+        teacherModal.open();
+      }
+    });
+
+    // 初期化
+    window.onload = () => {
+      lab1Logic.initSurvey();
+    };
+
+  </script>
+</body>
+</html>
